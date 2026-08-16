@@ -723,6 +723,16 @@ class EmulatorJS {
             }
 
             let legacy = (this.supportsWebgl2 && this.webgl2Enabled ? "" : "-legacy");
+
+            // JSPI detection: cores with dual JSPI+Asyncify builds use the
+            // non-legacy slot for JSPI and the legacy slot for Asyncify.
+            // Browsers without JSPI support automatically get the Asyncify fallback.
+            const jspiCores = ["bluemsx"];
+            if (jspiCores.includes(this.getCore()) && typeof WebAssembly.Suspending !== "function") {
+                legacy = "-legacy";
+                console.log("[EJS Core] JSPI not supported, falling back to Asyncify build");
+            }
+
             let filename = this.getCore() + (threads ? "-thread" : "") + legacy + "-wasm.data";
 
             // Download the core
